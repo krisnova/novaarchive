@@ -11,6 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// ----------------------------------------------------------------------------
+//
+// Legacy Regression tests for 0.1.0
+//
+// Note: @christopherhein added these tests and I am unsure if Amazon
+// is still using the old io.Writer append() convention.
+// Either way, I am keeping legacy (deprecated) support for it.
+//
+// All of these regression tests should still pass.
+//
+// ----------------------------------------------------------------------------
 
 package logger
 
@@ -36,7 +48,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func TestAlways(t *testing.T) {
+func TestAlwaysLegacy(t *testing.T) {
 	e, err := regexp.Compile(fmt.Sprintf(formatExp, PreAlways))
 	g := captureLoggerOutput(Always, format, a)
 
@@ -49,7 +61,7 @@ func TestAlways(t *testing.T) {
 	}
 }
 
-func TestCritical(t *testing.T) {
+func TestCriticalLegacy(t *testing.T) {
 	Level = 1
 
 	e, err := regexp.Compile(fmt.Sprintf(formatExp, PreCritical))
@@ -64,7 +76,7 @@ func TestCritical(t *testing.T) {
 	}
 }
 
-func TestInfo(t *testing.T) {
+func TestInfoLegacy(t *testing.T) {
 	Level = 3
 
 	e, err := regexp.Compile(fmt.Sprintf(formatExp, PreInfo))
@@ -79,7 +91,7 @@ func TestInfo(t *testing.T) {
 	}
 }
 
-func TestSuccess(t *testing.T) {
+func TestSuccessLegacy(t *testing.T) {
 	Level = 3
 
 	e, err := regexp.Compile(fmt.Sprintf(formatExp, PreSuccess))
@@ -94,7 +106,7 @@ func TestSuccess(t *testing.T) {
 	}
 }
 
-func TestDebug(t *testing.T) {
+func TestDebugLegacy(t *testing.T) {
 	Level = 4
 
 	e, err := regexp.Compile(fmt.Sprintf(formatExp, PreDebug))
@@ -109,7 +121,7 @@ func TestDebug(t *testing.T) {
 	}
 }
 
-func TestWarning(t *testing.T) {
+func TestWarningLegacy(t *testing.T) {
 	Level = 2
 
 	e, err := regexp.Compile(fmt.Sprintf(formatExp, PreWarning))
@@ -124,7 +136,7 @@ func TestWarning(t *testing.T) {
 	}
 }
 
-func TestWithoutTimestamps(t *testing.T) {
+func TestWithoutTimestampsLegacy(t *testing.T) {
 	Timestamps = false
 	e, err := regexp.Compile(fmt.Sprintf(formatWOTimeExp, PreAlways))
 	g := captureLoggerOutput(Always, format, a)

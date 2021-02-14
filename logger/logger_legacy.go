@@ -16,6 +16,7 @@ package logger
 
 import (
 	"io"
+	"sync"
 )
 
 // Legacy Logic for 0.1.0
@@ -50,6 +51,11 @@ var (
 	Level = -1
 )
 
+var (
+	testRaceMutex = sync.Mutex{}
+	annoyed       = false
+)
+
 // checkDeprecatedValues is a singleton
 // that will only execute once.
 // This will convert the legacy logger.Level
@@ -57,20 +63,31 @@ var (
 //
 //	LogEverything =
 func checkDeprecatedValues() {
+	testRaceMutex.Lock()
+	defer testRaceMutex.Unlock()
 	if Level != -1 {
-		Deprecated("logger.Level is deprecated. Use logger.BitwiseLevel")
+		if !annoyed {
+			Deprecated("********")
+			Deprecated("***")
+			Deprecated("*")
+			Deprecated("logger.Level is deprecated. Use logger.BitwiseLevel")
+			Deprecated("*")
+			Deprecated("***")
+			Deprecated("********")
+			annoyed = true
+		}
 		if Level == 4 {
-			BitwiseLevel = LogAlways | LogSuccess | LogCritical | LogWarning | LogInfo | LogDebug
+			BitwiseLevel = LogDeprecated | LogAlways | LogSuccess | LogCritical | LogWarning | LogInfo | LogDebug
 		} else if Level == 3 {
-			BitwiseLevel = LogAlways | LogSuccess | LogCritical | LogWarning | LogInfo
+			BitwiseLevel = LogDeprecated | LogAlways | LogSuccess | LogCritical | LogWarning | LogInfo
 		} else if Level == 2 {
-			BitwiseLevel = LogAlways | LogSuccess | LogCritical | LogWarning
+			BitwiseLevel = LogDeprecated | LogAlways | LogSuccess | LogCritical | LogWarning
 		} else if Level == 1 {
-			BitwiseLevel = LogAlways | LogSuccess | LogCritical
+			BitwiseLevel = LogDeprecated | LogAlways | LogSuccess | LogCritical
 		} else if Level == 0 {
-			BitwiseLevel = LogAlways | LogSuccess
+			BitwiseLevel = LogDeprecated | LogAlways | LogSuccess
 		} else {
-			BitwiseLevel = LogEverything
+			BitwiseLevel = LogDeprecated | LogEverything
 		}
 	}
 }

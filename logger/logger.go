@@ -44,21 +44,22 @@ const (
 	// Also these are the string prefixes
 	// for the log lines.
 	LogAlways     = 1
-	PreAlways     = "Always"
+	PreAlways     = "Always    "
 	LogSuccess    = 2
-	PreSuccess    = "Success"
+	PreSuccess    = "Success   "
 	LogCritical   = 4
-	PreCritical   = "Critical"
+	PreCritical   = "Critical  "
 	LogWarning    = 8
-	PreWarning    = "Warning"
+	PreWarning    = "Warning   "
 	LogInfo       = 16
-	PreInfo       = "Info"
+	PreInfo       = "Info      "
 	LogDebug      = 32
-	PreDebug      = "Debug"
+	PreDebug      = "Debug     "
 	LogDeprecated = 64
 	PreDeprecated = "Deprecated"
 
-	LogLegacyLevel2 = LogAlways | LogSuccess | LogCritical | LogWarning | LogInfo
+	LogLegacyLevel2           = LogAlways | LogSuccess | LogCritical | LogWarning | LogInfo
+	LogLegacyLevel2Deprecated = LogLegacyLevel2 | LogDeprecated
 
 	// Enable all Logging levels
 	// [127]
@@ -85,7 +86,7 @@ var (
 	//
 	// TODO @kris-nova In the next release flip to LogEverything
 	// BitwiseLevel = LogEverything
-	BitwiseLevel = LogLegacyLevel2
+	BitwiseLevel = LogLegacyLevel2Deprecated
 
 	// A custom io.Writer to use regardless of Mode
 	Writer io.Writer = os.Stdout
