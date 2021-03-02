@@ -32,7 +32,7 @@ func TestHappyJobOrder(t *testing.T) {
 			if jE.E != nil {
 				t.Errorf("found error running job(%s): %v", jE.Job.Name, jE.E)
 			} else {
-				t.Logf("Succes: %s", jE.Job.Name)
+				//t.Logf("Succes: %s", jE.Job.Name)
 			}
 		}
 	}()

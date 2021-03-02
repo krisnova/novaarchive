@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kris-nova/novaarchive/logger"
+	"github.com/kris-nova/logger"
 )
 
 var (
