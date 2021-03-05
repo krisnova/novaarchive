@@ -40,10 +40,10 @@ type TwitterBotCredentials struct {
 // NewTwitterBotCredentialsFromEnvironmentalVariables will read from the
 // associated environmental variables regardless if they are set.
 func NewTwitterBotCredentialsFromEnvironmentalVariables() *TwitterBotCredentials {
-	return NewTwitterBotCredentials(os.Getenv("NOVA_TWITTER_ACCESSTOKEN"),
-		os.Getenv("NOVA_TWITTER_ACCESSSECRET"),
-		os.Getenv("NOVA_TWITTER_CONSUMERKEY"),
-		os.Getenv("NOVA_TWITTER_CONSUMERSECRET"))
+	return NewTwitterBotCredentials(os.Getenv("TWITTERTOKEN"),
+		os.Getenv("TWITTERTOKENSECRET"),
+		os.Getenv("TWITTERCONSUMERKEY"),
+		os.Getenv("TWITTERCONSUMERKEYSECRET"))
 }
 
 // NewTwitterBotCredentials returns a package safe auth struct
@@ -75,19 +75,19 @@ func (t *TwitterBot) SetBufferSizeGBytes(i int64) {
 	t.bufferSize = i * 1024 * 1024 * 1024
 }
 
-// AddSlashCommand is used to take a string "meeps" and search Twitter for "/meeps"
+// AddSlashKey is used to take a string "meeps" and search Twitter for "/meeps"
 // add a command string without the slash.
-func (t *TwitterBot) AddSlashCommand(cmd string) {
-	if strings.HasPrefix(cmd, "/") {
-		t.AddCommand(cmd)
+func (t *TwitterBot) AddSlashKey(key string) {
+	if strings.HasPrefix(key, "/") {
+		t.AddKey(key)
 		return
 	}
-	t.AddCommand(fmt.Sprintf("/%s", cmd))
+	t.AddKey(fmt.Sprintf("/%s", key))
 }
 
 // AddCommand is used
-func (t *TwitterBot) AddCommand(cmd string) {
-	t.searchKeys = append(t.searchKeys, cmd)
+func (t *TwitterBot) AddKey(key string) {
+	t.searchKeys = append(t.searchKeys, key)
 }
 
 // SendTweet is the function type that will be executed
@@ -100,15 +100,27 @@ func (t *TwitterBot) SetSendTweet(s SendTweet) {
 	t.sendFunc = s
 }
 
+func (t *TwitterBot) Login() (*anaconda.User, error) {
+	values := url.Values{}
+	user, err := t.api.GetSelf(values)
+	if err != nil {
+		return nil, fmt.Errorf("unable to login: error message: %v", err)
+	}
+	return &user, nil
+}
+
 // Run will start the bot concurrently, and return an error if the bot cannot start
 func (t *TwitterBot) Run() error {
 	ch := make(chan error)
+
 	if len(t.searchKeys) < 1 {
 		return fmt.Errorf("unable to start bot, empty search keys, please use AddCommand() to add a search key")
 	}
 	if !t.fSet {
 		return fmt.Errorf("unable to start bot, missing SendTweet function, please use SetSendTweet() to set a function")
 	}
+
+	// GetStream()
 	values := url.Values{}
 	// Documentation: https://developer.twitter.com/en/docs/twitter-api/v1/tweets/filter-realtime/guies/basic-stream-parameters
 	values.Set("track", strings.Join(t.searchKeys, ","))
@@ -156,6 +168,9 @@ func (t *TwitterBot) NextError() error {
 		//
 	}
 	var err error
+	// Pop
+	// err -> { err, err, err } -> {err}
+	//                              Pop
 	err, t.errBuffer = t.errBuffer[len(t.errBuffer)-1], t.errBuffer[:len(t.errBuffer)-1]
 	return err
 }
