@@ -43,14 +43,10 @@ func FindOldestPhotoCustom(photos []api.Photo) (*api.Photo, error) {
 	var highestDelta time.Duration
 	var oldestPhoto *api.Photo
 	now := time.Now()
+	// 100
 	for _, photo := range photos {
-		cd := GetCustomData(photo)
-		if cd == nil {
-			continue
-		}
-		// delta = now - update
-		// 7     = 100 - 97
-		delta := now.Sub(cd.Updated)
+		u := photo.UpdatedAt
+		delta := now.Sub(u)
 		if delta > highestDelta {
 			oldestPhoto = &photo
 			highestDelta = delta

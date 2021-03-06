@@ -18,14 +18,14 @@ const DefaultBufferSizeBytes int64 = 1024 * 1024 * 1024 * 2
 // TwitterBot is used to listen for strings on Twitter
 // and respond by calling an associated SendTweet function
 type TwitterBot struct {
-	api        *anaconda.TwitterApi
-	searchKeys []string
-	sendFunc   SendTweet
-	fSet       bool
-	errs       chan error
-	errBuffer  []error
-	bufferSize int64
-	tweetMutex sync.Mutex
+	api           *anaconda.TwitterApi
+	searchKeys    []string
+	sendFunc      SendTweet
+	fSet          bool
+	errs          chan error
+	errBuffer     []error
+	maxBufferSize int64
+	tweetMutex    sync.Mutex
 }
 
 // TwitterBotCredentials is just an unexported wrapper for
@@ -60,19 +60,19 @@ func NewTwitterBotCredentials(accessToken, accessSecret, consumerKey, consumerSe
 func NewTwitterBot(c *TwitterBotCredentials) *TwitterBot {
 	api := anaconda.NewTwitterApiWithCredentials(c.accessToken, c.accessSecret, c.consumerKey, c.consumerSecret)
 	return &TwitterBot{
-		bufferSize: DefaultBufferSizeBytes,
-		api:        api,
+		maxBufferSize: DefaultBufferSizeBytes,
+		api:           api,
 	}
 }
 
 // SetBufferSizeGBytes will set the buffer size in B
 func (t *TwitterBot) SetBufferSizeBytes(i int64) {
-	t.bufferSize = i
+	t.maxBufferSize = i
 }
 
 // SetBufferSizeGBytes will set the buffer size in Gb
 func (t *TwitterBot) SetBufferSizeGBytes(i int64) {
-	t.bufferSize = i * 1024 * 1024 * 1024
+	t.maxBufferSize = i * 1024 * 1024 * 1024
 }
 
 // AddSlashKey is used to take a string "meeps" and search Twitter for "/meeps"
@@ -126,6 +126,8 @@ func (t *TwitterBot) Run() error {
 	values.Set("track", strings.Join(t.searchKeys, ","))
 	values.Set("stall_warnings", "true")
 	stream := t.api.PublicStreamFilter(values)
+
+	// ------- [ Concurrent Listener ] ------
 	go func() {
 		for tweetInterface := range stream.C {
 			switch v := tweetInterface.(type) {
@@ -144,14 +146,17 @@ func (t *TwitterBot) Run() error {
 		}
 	}()
 	t.errs = ch
+
+	// ------ [ Concurrent Buffer Loader ] ------
 	go func() {
 		for {
 			bufferSize := int64(binary.Size(t.errBuffer))
-			if bufferSize >= t.bufferSize {
-				// We are dropping errors here!
+			if bufferSize > t.maxBufferSize {
+				// Droping errors here!
 				continue
 			}
-			t.errBuffer = append(t.errBuffer, <-t.errs)
+			err := <-t.errs
+			t.errBuffer = append(t.errBuffer, err)
 		}
 	}()
 	return nil
@@ -163,9 +168,10 @@ func (t *TwitterBot) Run() error {
 // Note: Not calling this message is dangerous as eventually the
 // buffer will fill up, and messages will be dropped
 func (t *TwitterBot) NextError() error {
-	// hang while we have < 1 errors
-	for len(t.errs) < 1 {
-		//
+	for {
+		if len(t.errBuffer) > 0 {
+			break
+		}
 	}
 	var err error
 	// Pop

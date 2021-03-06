@@ -15,6 +15,16 @@ type PhotoFinder struct {
 	photos   []api.Photo
 }
 
+func NewRandomPhotoFinder(client *photoprism.Client, albumUID string) *PhotoFinder {
+	return &PhotoFinder{
+		rules: map[int]FindPhotoRule{
+			0: FindRandomPhoto,
+		},
+		client:   client,
+		albumUID: albumUID,
+	}
+}
+
 // NewDefaultPhotoFinder will load the default (and probably most common)
 // rules and give you a photo finder :)
 func NewDefaultPhotoFinder(client *photoprism.Client, albumUID string) *PhotoFinder {
@@ -43,7 +53,7 @@ func (p *PhotoFinder) Find() (*api.Photo, error) {
 	}
 	for i := 0; i < len(p.rules); i++ {
 		f := p.rules[i] // This is done to ensure we preserve rule order!
-		p, err := f(p.photos)
+		ph, err := f(p.photos)
 		if err != nil {
 			if errMsg == "" {
 				errMsg = err.Error()
@@ -52,7 +62,9 @@ func (p *PhotoFinder) Find() (*api.Photo, error) {
 			}
 			continue // Continue here because error
 		}
-		return p, nil
+		//fmt.Printf("%+v\n", p.rules[i])
+		//fmt.Println(i)
+		return ph, nil
 	}
 	return nil, fmt.Errorf("unable to find photo: %s", errMsg)
 }
@@ -71,7 +83,7 @@ func (p *PhotoFinder) LoadPhotos() error {
 		return fmt.Errorf("unable to find photos in album [%s] check albumUID in config: %v", albumUID, err)
 	}
 	if len(photos) < 1 {
-		return fmt.Errorf("unable to find >0 photos in album [%s] check albumUID in config", albumUID)
+		return fmt.Errorf("unable to find > 0 photos in album [%s] check albumUID in config", albumUID)
 
 	}
 	p.photos = photos
