@@ -9,6 +9,9 @@ import (
 )
 
 type CustomData struct {
+	// Deprecated
+	LastTweet *time.Time
+
 	Updated     time.Time
 	NoteStrings []string
 	KeyValue    map[string]string

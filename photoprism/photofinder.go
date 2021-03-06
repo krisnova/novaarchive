@@ -10,14 +10,14 @@ import (
 // PhotoFinder is used to find photos by rules :)
 type PhotoFinder struct {
 	rules    map[int]FindPhotoRule
-	client   photoprism.Client
+	client   *photoprism.Client
 	albumUID string
 	photos   []api.Photo
 }
 
 // NewDefaultPhotoFinder will load the default (and probably most common)
 // rules and give you a photo finder :)
-func NewDefaultPhotoFinder(client photoprism.Client, albumUID string) *PhotoFinder {
+func NewDefaultPhotoFinder(client *photoprism.Client, albumUID string) *PhotoFinder {
 	return &PhotoFinder{
 		rules: map[int]FindPhotoRule{
 			0: FindFavoritePhoto,
