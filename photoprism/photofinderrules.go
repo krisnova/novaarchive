@@ -59,13 +59,8 @@ func FindOldestPhotoCustom(photos []api.Photo) (*api.Photo, error) {
 }
 
 func FindRandomPhoto(photos []api.Photo) (*api.Photo, error) {
-	set := make([]interface{}, len(photos))
-	for _, photo := range photos {
-		set = append(set, photo)
-	}
-	selector := random.NewSelector(set)
-	v := selector.Pick()
-	p := v.(api.Photo)
+	r := random.IBetween(0, len(photos))
+	p := photos[r-1]
 	return &p, nil
 }
 
