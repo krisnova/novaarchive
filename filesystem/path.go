@@ -43,3 +43,7 @@ func Expand(given string) string {
 	}
 	return given
 }
+
+func (p *Path) String() string {
+	return p.absolute
+}
